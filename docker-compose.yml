@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./checkpoints:/app/checkpoints:ro
+    environment:
+      - MODEL_PATH=/app/checkpoints/resnet50_best.pt
+      - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

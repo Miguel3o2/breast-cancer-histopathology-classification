@@ -1,0 +1,39 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.env.*
+
+# Local data and artifacts
+data/raw/
+data/processed/
+data/masks/
+data/clinical/
+checkpoints/
+*.npy
+*.npz
+*.csv
+mask_visualization.png
+training_history_*.npy
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary logs
+*.log
+venv/
+venv311/
+__pycache__/
+*.pyc
+.env
