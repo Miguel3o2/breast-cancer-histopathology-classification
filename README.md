@@ -177,9 +177,6 @@ docker-compose.yml
 - The current API serves classifier predictions only; segmentation and multimodal fusion are not yet exposed as production-ready endpoints.
 - This project is suitable for portfolio/demo use and learning, but not for real clinical deployment.
 
-## Portfolio-Friendly Summary
-
-Built a breast cancer histopathology classification prototype using PyTorch, ResNet50 transfer learning, FastAPI, and the BreakHis dataset. Implemented patient-level dataset splitting, augmentation, training, evaluation metrics, and an inference API, while also exploring extensions for segmentation and multimodal fusion.
 
 ## References
 
