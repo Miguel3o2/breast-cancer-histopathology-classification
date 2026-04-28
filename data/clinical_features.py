@@ -1,14 +1,3 @@
-"""
-Generate Synthetic Clinical Features for BreakHis
-
-Since BreakHis doesn't include real patient data, we simulate realistic
-clinical features based on medical statistics:
-- Age distribution
-- Tumor size estimates
-- Family history probabilities
-- Magnification levels (already in dataset)
-"""
-
 import os
 import numpy as np
 import pandas as pd
@@ -16,22 +5,6 @@ from pathlib import Path
 
 
 def simulate_clinical_features(df, seed=42):
-    """
-    Generate synthetic clinical features for each image.
-    
-    Features:
-    1. Age (years) - sampled from realistic distributions
-    2. Tumor size (mm) - estimated from image
-    3. Family history (binary) - 0/1
-    4. Magnification (categorical) - already in dataset, one-hot encoded
-    
-    Args:
-        df: DataFrame with columns [image_path, label, magnification, ...]
-        seed: random seed for reproducibility
-    
-    Returns:
-        df with added clinical feature columns
-    """
     np.random.seed(seed)
     
     n_samples = len(df)
@@ -96,20 +69,6 @@ def simulate_clinical_features(df, seed=42):
 
 
 def normalize_features(df, split='train', stats=None):
-    """
-    Z-score normalization for continuous features.
-    
-    Important: Use training set statistics for val/test normalization
-    to avoid data leakage.
-    
-    Args:
-        df: DataFrame with clinical features
-        split: 'train', 'val', or 'test'
-        stats: dict with mean/std from training set (for val/test)
-    
-    Returns:
-        df with normalized features, stats dict
-    """
     continuous_features = ['age', 'tumor_size_mm']
     
     if split == 'train':
@@ -166,13 +125,6 @@ def extract_clinical_vector(row):
 
 
 def generate_all_clinical_features(data_dir='./data/processed', output_dir='./data/clinical'):
-    """
-    Generate clinical features for all splits and save.
-    
-    Args:
-        data_dir: directory with train.csv, val.csv, test.csv
-        output_dir: where to save clinical feature CSVs
-    """
     os.makedirs(output_dir, exist_ok=True)
     
     # Load splits
@@ -215,7 +167,6 @@ def generate_all_clinical_features(data_dir='./data/processed', output_dir='./da
 
 
 def print_clinical_summary(df, split='train'):
-    """Print summary statistics of clinical features."""
     print(f"\n{split.upper()} SET CLINICAL SUMMARY")
     print("=" * 60)
     
@@ -244,7 +195,6 @@ if __name__ == '__main__':
     print("Clinical Feature Generation for BreakHis")
     print("=" * 70)
     
-    # Generate features
     train_df, val_df, test_df, stats = generate_all_clinical_features()
     
     # Print summaries
