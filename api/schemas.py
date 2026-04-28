@@ -1,13 +1,8 @@
-"""
-Pydantic schemas for request/response validation.
-"""
-
 from pydantic import BaseModel, Field
 from typing import Optional
 
 
 class ClinicalFeatures(BaseModel):
-    """Clinical feature inputs."""
     age: int = Field(..., ge=20, le=90, description="Patient age in years")
     tumor_size_mm: float = Field(..., ge=1, le=100, description="Tumor size in mm")
     family_history: int = Field(..., ge=0, le=1, description="Family history (0=no, 1=yes)")
