@@ -1,12 +1,3 @@
-"""
-FastAPI Application for Model Serving.
-
-Endpoints:
-- POST /predict: Get prediction for an image
-- GET /health: Health check
-- GET /: Basic API message
-"""
-
 import base64
 import os
 import time
