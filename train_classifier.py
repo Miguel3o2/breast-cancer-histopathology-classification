@@ -1,13 +1,3 @@
-"""
-Train ResNet50 Classifier — Two-Stage Training
-
-Stage 1 (epochs 1-5):  Feature extraction (frozen backbone, high LR)
-Stage 2 (epochs 6-25): Fine-tuning (unfrozen, low LR)
-
-Usage:
-    python train_classifier.py
-    python train_classifier.py --epochs 30 --batch_size 64
-"""
 
 import os
 import argparse
@@ -23,7 +13,6 @@ from utils.metrics import compute_all_metrics, print_metrics, torch_to_numpy
 
 
 def train_epoch(model, dataloader, criterion, optimizer, scaler, device):
-    """Train for one epoch with mixed precision."""
     model.train()
     running_loss = 0.0
     
@@ -52,7 +41,6 @@ def train_epoch(model, dataloader, criterion, optimizer, scaler, device):
 
 @torch.no_grad()
 def validate_epoch(model, dataloader, device):
-    """Validate for one epoch."""
     model.eval()
     
     all_labels, all_preds, all_probs = [], [], []
@@ -81,14 +69,12 @@ def train(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"\nDevice: {device}")
     
-    # Data
     train_dl, val_dl, test_dl, class_weights = get_dataloaders(
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         img_size=224
     )
     
-    # Model
     model = ResNetClassifier(num_classes=2, pretrained=True, dropout=args.dropout).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights.to(device))
     scaler = GradScaler()
@@ -99,7 +85,6 @@ def train(args):
     
     print(f"\n{'='*60}\nTraining: {args.epochs} epochs\n{'='*60}\n")
     
-    # STAGE 1: Feature Extraction
     freeze_until = args.freeze_epochs
     if freeze_until > 0:
         print(f"STAGE 1: Feature Extraction (epochs 1-{freeze_until})")
@@ -107,17 +92,14 @@ def train(args):
         optimizer = torch.optim.Adam(model.get_trainable_params(), lr=args.lr_stage1, weight_decay=1e-4)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=freeze_until, eta_min=args.lr_stage1/100)
     
-    # Training loop
     for epoch in range(1, args.epochs + 1):
-        
-        # Switch to STAGE 2
+    
         if epoch == freeze_until + 1:
             print(f"\nSTAGE 2: Fine-Tuning (epochs {freeze_until+1}-{args.epochs})")
             model.unfreeze_backbone()
             optimizer = torch.optim.Adam(model.parameters(), lr=args.lr_stage2, weight_decay=1e-4)
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=(args.epochs - freeze_until), eta_min=1e-6)
         
-        # Train & validate
         train_loss = train_epoch(model, train_dl, criterion, optimizer, scaler, device)
         val_metrics = validate_epoch(model, val_dl, device)
         scheduler.step()
@@ -134,7 +116,6 @@ def train(args):
               f"auc {val_metrics['auc']:.4f}  "
               f"lr {optimizer.param_groups[0]['lr']:.2e}", end='')
         
-        # Save best
         if val_metrics['accuracy'] > best_val_acc:
             best_val_acc = val_metrics['accuracy']
             torch.save({
@@ -147,14 +128,12 @@ def train(args):
             print("  ← best", end='')
         print()
     
-    # Final test evaluation
     print(f"\n{'='*60}\nFinal Test Set Evaluation\n{'='*60}")
     checkpoint = torch.load('checkpoints/resnet50_best.pt')
     model.load_state_dict(checkpoint['model_state_dict'])
     test_metrics = validate_epoch(model, test_dl, device)
     print_metrics(test_metrics, title="Test Set Results")
     
-    # Save history
     np.save('training_history_resnet50.npy', history)
     print(f"\n✓ Training complete! Best val acc: {best_val_acc:.4f}")
 
