@@ -1,38 +1,11 @@
-"""
-BreakHis Dataset Download & Organization Script
-
-This script:
-1. Downloads the BreakHis dataset from Kaggle
-2. Organizes it into a clean folder structure
-3. Creates metadata CSV for easy loading
-
-Run this FIRST before anything else.
-
-Requirements:
-    pip install kaggle opendatasets --break-system-packages
-
-Usage:
-    python data/download_dataset.py
-"""
 
 import os
 from pathlib import Path
 
-DATASET_PATH = Path(r"C:\Users\bbbsa\Downloads\multimodal-cancer-COMPLETE\multimodal-cancer-detection\data")
+DATASET_PATH = Path(r"C:\Users\<user>\Downloads\multimodal-cancer-COMPLETE\multimodal-cancer-detection\data")
 
 
 def download_breakhis():
-    """
-    Download BreakHis dataset from Kaggle.
-
-    NOTE: You need a Kaggle account and API key.
-
-    Steps to get Kaggle API key:
-    1. Go to https://www.kaggle.com/settings
-    2. Click "Create New API Token"
-    3. Download kaggle.json
-    4. Place it in ~/.kaggle/ (Linux/Mac) or C:\\Users\\YourName\\.kaggle\\ (Windows)
-    """
     print("Downloading BreakHis dataset from Kaggle...")
     print("This will take 5-10 minutes (~700 MB).\n")
 
@@ -59,12 +32,6 @@ def download_breakhis():
 
 
 def organize_dataset():
-    """
-    BreakHis comes in a nested folder structure. This flattens it for easier access.
-
-    We'll create a simpler CSV with:
-        image_path, label, magnification, subtype
-    """
     print("\nOrganizing dataset structure...")
 
     base_path = Path("./data/raw/breakhis/BreaKHis_v1/histology_slides/breast")
@@ -132,7 +99,6 @@ def organize_dataset():
 
 
 def verify_dataset():
-    """Quick sanity check that everything downloaded correctly."""
     import pandas as pd
 
     csv_path = './data/processed/dataset_full.csv'
