@@ -29,7 +29,6 @@ model_load_error = None
 
 
 def load_model():
-    """Load the trained classifier checkpoint if present."""
     global model, model_load_error
 
     model_path = Path(MODEL_PATH)
