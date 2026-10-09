@@ -10,25 +10,18 @@ def simulate_clinical_features(df, seed=42):
     n_samples = len(df)
     df = df.copy()
     
-    # Feature 1: Patient Age
-    # Realistic distributions based on medical statistics
     ages = []
     for label in df['label']:
         if label == 'benign':
-            # Benign tumors: younger patients (mean 45, std 12)
             age = np.random.normal(45, 12)
         else:  # malignant
-            # Malignant tumors: older patients (mean 58, std 15)
             age = np.random.normal(58, 15)
         
-        # Clamp to realistic range [20, 90]
         age = np.clip(age, 20, 90)
         ages.append(age)
     
     df['age'] = ages
     
-    # Feature 2: Tumor Size (mm)
-    # Estimate from label (malignant typically larger)
     sizes = []
     for label in df['label']:
         if label == 'benign':
@@ -38,14 +31,11 @@ def simulate_clinical_features(df, seed=42):
             # Malignant: larger (mean 28mm, std 12)
             size = np.random.normal(28, 12)
         
-        # Clamp to realistic range [5, 50]
         size = np.clip(size, 5, 50)
         sizes.append(size)
     
     df['tumor_size_mm'] = sizes
     
-    # Feature 3: Family History (binary)
-    # Higher probability for malignant cases
     family_history = []
     for label in df['label']:
         if label == 'benign':
@@ -59,8 +49,6 @@ def simulate_clinical_features(df, seed=42):
     
     df['family_history'] = family_history
     
-    # Feature 4: Magnification (one-hot encode)
-    # Already in dataset, just need to encode
     magnifications = df['magnification'].unique()
     for mag in magnifications:
         df[f'mag_{mag}'] = (df['magnification'] == mag).astype(int)
@@ -72,7 +60,6 @@ def normalize_features(df, split='train', stats=None):
     continuous_features = ['age', 'tumor_size_mm']
     
     if split == 'train':
-        # Compute statistics from training data
         stats = {}
         for feat in continuous_features:
             stats[feat] = {
@@ -80,12 +67,10 @@ def normalize_features(df, split='train', stats=None):
                 'std': df[feat].std()
             }
         
-        # Normalize
         for feat in continuous_features:
             df[f'{feat}_norm'] = (df[feat] - stats[feat]['mean']) / stats[feat]['std']
     
     else:
-        # Use provided training statistics
         if stats is None:
             raise ValueError("Must provide training statistics for val/test normalization")
         
@@ -96,21 +81,6 @@ def normalize_features(df, split='train', stats=None):
 
 
 def extract_clinical_vector(row):
-    """
-    Extract clinical feature vector for a single sample.
-    
-    Features (7-dim):
-    - age_norm (1)
-    - tumor_size_mm_norm (1)
-    - family_history (1)
-    - mag_40X, mag_100X, mag_200X, mag_400X (4)
-    
-    Args:
-        row: pandas Series with clinical features
-    
-    Returns:
-        numpy array of shape (7,)
-    """
     features = [
         row['age_norm'],
         row['tumor_size_mm_norm'],
@@ -127,7 +97,6 @@ def extract_clinical_vector(row):
 def generate_all_clinical_features(data_dir='./data/processed', output_dir='./data/clinical'):
     os.makedirs(output_dir, exist_ok=True)
     
-    # Load splits
     train_df = pd.read_csv(os.path.join(data_dir, 'train.csv'))
     val_df = pd.read_csv(os.path.join(data_dir, 'val.csv'))
     test_df = pd.read_csv(os.path.join(data_dir, 'test.csv'))
@@ -137,22 +106,18 @@ def generate_all_clinical_features(data_dir='./data/processed', output_dir='./da
     print(f"  Val: {len(val_df)} samples")
     print(f"  Test: {len(test_df)} samples")
     
-    # Generate features
     train_df = simulate_clinical_features(train_df, seed=42)
     val_df = simulate_clinical_features(val_df, seed=43)
     test_df = simulate_clinical_features(test_df, seed=44)
     
-    # Normalize (using training stats)
     train_df, stats = normalize_features(train_df, split='train')
     val_df, _ = normalize_features(val_df, split='val', stats=stats)
     test_df, _ = normalize_features(test_df, split='test', stats=stats)
     
-    # Save
     train_df.to_csv(os.path.join(output_dir, 'train_clinical.csv'), index=False)
     val_df.to_csv(os.path.join(output_dir, 'val_clinical.csv'), index=False)
     test_df.to_csv(os.path.join(output_dir, 'test_clinical.csv'), index=False)
     
-    # Save normalization stats
     import json
     with open(os.path.join(output_dir, 'normalization_stats.json'), 'w') as f:
         json.dump(stats, f, indent=2)
@@ -170,19 +135,16 @@ def print_clinical_summary(df, split='train'):
     print(f"\n{split.upper()} SET CLINICAL SUMMARY")
     print("=" * 60)
     
-    # Age by label
     print("\nAge distribution:")
     for label in df['label'].unique():
         ages = df[df['label'] == label]['age']
         print(f"  {label}: {ages.mean():.1f} ± {ages.std():.1f} years")
     
-    # Tumor size by label
     print("\nTumor size distribution:")
     for label in df['label'].unique():
         sizes = df[df['label'] == label]['tumor_size_mm']
         print(f"  {label}: {sizes.mean():.1f} ± {sizes.std():.1f} mm")
     
-    # Family history by label
     print("\nFamily history:")
     for label in df['label'].unique():
         fh_pct = df[df['label'] == label]['family_history'].mean() * 100
@@ -197,12 +159,10 @@ if __name__ == '__main__':
     
     train_df, val_df, test_df, stats = generate_all_clinical_features()
     
-    # Print summaries
     print_clinical_summary(train_df, 'train')
     print_clinical_summary(val_df, 'val')
     print_clinical_summary(test_df, 'test')
     
-    # Test feature extraction
     print("\nTesting clinical feature extraction...")
     sample_features = extract_clinical_vector(train_df.iloc[0])
     print(f"  Feature vector shape: {sample_features.shape}")
